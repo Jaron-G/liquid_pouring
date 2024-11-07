@@ -1,0 +1,5 @@
+<launch>
+    <!-- start the robot simulation grasp environment-->
+    <include file="$(find grasp_eyeinhand)/launch/UR_robot.launch"> </include> 
+    
+</launch>

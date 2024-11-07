@@ -1,0 +1,5 @@
+roslaunch grasp_eyeinhand pour.launch
+# rosrun controller_manager controller_manager stop /ur10e_robot/pos_joint_traj_controller
+# rosrun controller_manager controller_manager spawner joint_group_vel_controller
+
+# rosrun controller_manager unspawner pos_joint_traj_controller
