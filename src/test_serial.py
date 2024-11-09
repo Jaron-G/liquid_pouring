@@ -23,7 +23,7 @@ stopbits=serial.STOPBITS_ONE,
 )
 
 
-# 打开COM3，将波特率配置为9600，停止位1，无校验位，数据位8位。
+# 打开串口，将波特率配置为9600，停止位1，无校验位，数据位8位。
 if ser.isOpen(): # 判断串口是否成功打开
     print("打开串口成功。")
     print(ser.name) # 输出串口号

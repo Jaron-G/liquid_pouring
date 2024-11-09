@@ -42,50 +42,50 @@ class PDController:
 if __name__ == "__main__":
     import numpy as np
     from matplotlib import pyplot as plt
-    import serial
-    import serial.tools.list_ports
+    # import serial
+    # import serial.tools.list_ports
 
-    ports_list = list(serial.tools.list_ports.comports())
-    if len(ports_list) <= 0:
-        print("无串口设备。")
-    else:
-        print("可用的串口设备如下：")
-        for comport in ports_list:
-            print(list(comport)[0], list(comport)[1])
+    # ports_list = list(serial.tools.list_ports.comports())
+    # if len(ports_list) <= 0:
+    #     print("无串口设备。")
+    # else:
+    #     print("可用的串口设备如下：")
+    #     for comport in ports_list:
+    #         print(list(comport)[0], list(comport)[1])
 
-    ser = serial.Serial(
-        port="COM3",
-        baudrate=9600,
-        bytesize=serial.EIGHTBITS,
-        parity=serial.PARITY_NONE,
-        stopbits=serial.STOPBITS_ONE,
-    )
+    # ser = serial.Serial(
+    #     port="/dev/ttyUSB1",
+    #     baudrate=9600,
+    #     bytesize=serial.EIGHTBITS,
+    #     parity=serial.PARITY_NONE,
+    #     stopbits=serial.STOPBITS_ONE,
+    # )
     # 示例使用
-    kp = 10  # 比例增益
-    kd = 0.1  # 微分增益
-    joint_range = (-202, -90)  # 转角范围
+    kp = 0.01  # 比例增益
+    kd = 1  # 微分增益
+    joint_range = (-0.3, 0.3)  # 转角范围
 
     # 创建PD控制器实例
     pd_controller = PDController(kp, kd, joint_range)
 
     # 假设目标重量是100kg，当前重量是90kg
-    target_weight = 100
+    target_weight = 40
 
-    pd_controller_flag = True
-    while pd_controller_flag:
-        current_weight = float(ser.readline().decode().strip())
-        joint_angle = pd_controller.calculate(target_weight, current_weight)
-        print(
-            f"当前重量：{current_weight}, 目标重量：{target_weight}, 关节角度：{joint_angle}"
-        )
+    # pd_controller_flag = True
+    # while pd_controller_flag:
+    #     current_weight = float(ser.readline().decode().strip())
+    #     joint_angle = pd_controller.calculate(target_weight, current_weight)
+    #     print(
+    #         f"当前重量：{current_weight}, 目标重量：{target_weight}, 关节角度：{joint_angle}"
+    #     )
 
-    # line = np.linspace(95, 120, 200)
+    line = np.linspace(0, 100, 200)
 
-    # jointlist = []
-    # for i in line:
-    #     # 计算关节转角
-    #     joint_angle = pd_controller.calculate(target_weight, i)
-    #     print(f"{i}: {joint_angle}")
-    #     jointlist.append(joint_angle)
-    # plt.plot(line, jointlist)
-    # plt.show()
+    jointlist = []
+    for i in line:
+        # 计算关节转角
+        joint_angle = pd_controller.calculate(target_weight, i)
+        print(f"{i}: {joint_angle}")
+        jointlist.append(joint_angle)
+    plt.plot(line, jointlist)
+    plt.show()

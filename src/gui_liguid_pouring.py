@@ -4,10 +4,12 @@ import signal
 import rospy
 import serial
 import serial.tools.list_ports
+
 from pd_controller import PDController
-
 from robot_joint_vec_control import RobotMover
-
+from shaping_function import step_function
+import numpy as np
+import math
 
 class SerialHelper:
     def __init__(self, master):
@@ -97,7 +99,14 @@ class SerialHelper:
     def open_serial(self):
         port = self.port_combobox.get()
         baudrate = int(self.baudrate_entry.get())
-        self.serial = serial.Serial(port, baudrate)
+        self.serial = serial.Serial(
+            port="/dev/ttyUSB0",
+            baudrate=9600,
+            bytesize=serial.EIGHTBITS,
+            parity=serial.PARITY_NONE,
+            stopbits=serial.STOPBITS_ONE,
+            )
+        # self.serial = serial.Serial(port, baudrate)
         self.text_area.insert(tk.END, f"The serial port {port} has been opened ，Baud rate: {baudrate}\n")
 
     def close_serial(self):
@@ -136,18 +145,33 @@ class SerialHelper:
         )
 
         pd_controller = PDController(kp, kd, joint_range)
-        target_weight = 100.0
-
+        target_weight = 40.0
+        time = 0
         pd_controller_flag = True
-        rate = rospy.Rate(10)
+        rate = rospy.Rate(1)
         while pd_controller_flag:
             current_weight = float(self.serial.readline().decode().strip())
+            
             joint_angle = pd_controller.calculate(target_weight, current_weight)
+            # if np.abs(current_weight - target_weight) < 40:
+            if  np.abs(current_weight - target_weight)<1 or current_weight - target_weight > 0:
+                joint_angle = -0.3
+            elif current_weight  > 5 and current_weight < target_weight:
+                factor = step_function(time)
+                time += 0.5
+                joint_angle *= -factor*0.5
+                if np.abs(joint_angle) < 0.05:
+                    y=0.05 # 当误差较小时，为机器人速度做一个最低速度截断，防止机器人停在当前状态
+                    math.copysign(y,joint_angle)
+                    joint_angle=y
+                print(factor)
+           
             print(
                 f"当前重量：{current_weight}, 目标重量：{target_weight}, 关节角度：{joint_angle}"
             )
-            self.robot_mover.set_wrist3_speed(joint_angle)
-            rate.sleep()
+            
+            self.robot_mover.set_wrist3_speed(-joint_angle)
+            # rate.sleep()
 
         # def task1(self):
         #     self.weight_area.insert(tk.END, f"当前重量：{current_weight}\n")
